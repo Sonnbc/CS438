@@ -9,10 +9,10 @@ MAX_SEGMENT_SIZE = 200
 current_time = lambda: time.time() * 1000
 
 # header format
-# [sequence number, ack number, rwnd, valid ack] data
+# [sequence number, ack number, rwnd, is_ack] data
 # [10,4,50,0]this is a data
 
-def build_segment(seqnum, ack, rwnd, is_ack, data):
+def build_segment(seqnum, ack, rwnd, is_ack, data = ''):
     return str([seqnum, ack, rwnd, is_ack]) + data
 
 def get_header(segment):
@@ -21,7 +21,7 @@ def get_header(segment):
 def get_data(segment):
     return segment[segment.find(']')+1:]    
     
-def get_seg_num(segment):
+def get_seqnum(segment):
     return get_header(segment)[0]
 
 def get_ack(segment):
@@ -42,11 +42,9 @@ def id_to_last_byte(id):
 def inf():
     return float('Inf')    
     
-#------------------------------------------------------------------------------
-def udp_receive(sock):
-    try:
-        return sock.recvfrom(MAX_SEGMENT_SIZE)
-    except:
-        return None, None
+
+  
+        
+
         
         

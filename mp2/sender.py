@@ -21,6 +21,13 @@ class TCPSender:
     def udp_send(self, segment):
         sock, domain, port = self.connection
         sock.sendto(segment, (domain, port))
+        
+#------------------------------------------------------------------------------
+    def udp_receive(self, sock):
+        try:
+            return sock.recvfrom(MAX_SEGMENT_SIZE)
+        except:
+            return None, None        
 
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
@@ -68,8 +75,10 @@ class TCPSender:
         self.timer = [inf()] * self.count
         
         idx = 0
-        while True:
-            segment, _ = udp_receive(self.connection[0])
+        while idx < self.count:
+            segment, _ = self.udp_receive(self.connection[0])
+            if segment:
+                print segment, get_ack(segment)
             timer = self.timer[byte_to_id(self.send_base)]
             sofar = self.next_seq_num - self.send_base 
             
