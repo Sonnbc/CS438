@@ -4,29 +4,24 @@ from common import *
 import errno
 
 class TCPSender:
-
-    self.last_byte_sent = 0
-    self.last_byte_acked = 0
-
-    self.send_base = INIT_SEQ_NUM
-    self.next_seq_num = INIT_SEQ_NUM
-
+    
+    rwnd = RWND_INIT
+    send_base = INIT_SEQ_NUM
+    next_seq_num = INIT_SEQ_NUM 
+    segments = []
+    
+    timeout = 5000 #ms
+    
 #TODO: initialize timer and timeout
     
-    def __init__(receiver_domain, receiver_port):
+    def __init__(self, receiver_domain, receiver_port):
         self.connection = self.make_connection(receiver_domain, receiver_port)    
    
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
-        sock, domain, port = connection
-        sock.sendto(data, (domain, port))
-#------------------------------------------------------------------------------
-    def udp_receive(self):
-        sock, _, _ = connection
-        try:
-            return sock.recvfrom(MSS)
-        except:
-            return None
+        sock, domain, port = self.connection
+        sock.sendto(segment, (domain, port))
+
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
         my_socket = socket(AF_INET, SOCK_DGRAM)
@@ -35,42 +30,63 @@ class TCPSender:
 #------------------------------------------------------------------------------    
     def handle_ack(self, segment):
         
-        ack = segment.get_ack()
+        ack = get_ack(segment)
         if ack <= self.send_base:
             return
         
-        acked_id = byte_to_id(ack - 1)
+        idx = byte_to_id(ack - 1)
         
         self.send_base = ack
-        self.last_byte_acked = ack - 1
+        self.rwnd = get_rwnd(segment)
         
-        if last_byte_sent > last_byte_acked:
-            timer = sent_time[acked_id + 1] + timeout
+        #last_byte_sent > last_byte_acked:
+        #if self.next_seq_num > self.send_base: 
+        #    self.timer[ = self.sent_time[acked_id + 1] + self.timeout
+            
+        if self.next_seq_num == ack:
+            self.timer = inf()            
 #------------------------------------------------------------------------------
     def handle_timeout(self):
-        first_byte_unacked = last_byte_acked + 1
-        first_id_unacked = byte_to_id(first_byte_unacked)
-        transmit(first_id_unacked)
+        first_id_unacked = byte_to_id(self.send_base)
+        self.retransmit(first_id_unacked)
 
 #------------------------------------------------------------------------------
-    def transmit_segment(self, idx):
-        segment = self.build_segment(idx) #header + data[idx]
+    def send_segment(self, idx):
+        segment = build_segment(self.next_seq_num, 0, 
+            RWND_INIT, 0, self.data[idx])
+        self.segments[idx] = segment
+        
         self.udp_send(segment)
+        self.next_seq_num += len(self.data[idx])
         
-        last_byte_sent = id_to_max_byte(idx)
+        self.sent_time[idx] = current_time()
         
+        #if timer is currently not running
+        if self.timer == inf():
+            self.timer = self.sent_time[idx] + self.timeout
+#------------------------------------------------------------------------------
+    def retransmit(self, idx):
+        self.udp_send(self.segments[idx])
+        
+        self.sent_time[idx:] = [inf()] * (len(data) - idx)
+        self.sent_time[idx] = current_time()
+        self.timer = self.sent_time[idx] + self.timeout
                
 #------------------------------------------------------------------------------    
     def run(self, data):
         self.data = data
+        self.segments = [''] * len(data)
+        self.timer = [inf()] * len(data)
+        idx = 0
         while True:
-            ack = udp_receive(connection)
-            if ack:
-                handle_ack(ack)
-            elif current_time() >= timer:
-                handle_timeout()
-            elif has_data()
-                send()  
+            segment, _ = udp_receive(self.connection[0])
+            if segment and is_ack(segment):
+                self.handle_ack(segment)
+            elif current_time() >= self.timer:
+                self.handle_timeout()
+            elif self.next_seq_num - self.send_base <= self.rwnd:
+                self.send_segment(idx)
+                idx += 1
 #------------------------------------------------------------------------------    
 def main(filename, receiver_domain, receiver_port):
     sender = TCPSender(receiver_domain, receiver_port)
