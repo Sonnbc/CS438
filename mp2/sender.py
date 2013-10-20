@@ -34,17 +34,9 @@ class TCPSender:
         if ack <= self.send_base:
             return
         
-        idx = byte_to_id(ack - 1)
-        
         self.send_base = ack
         self.rwnd = get_rwnd(segment)
-        
-        #last_byte_sent > last_byte_acked:
-        #if self.next_seq_num > self.send_base: 
-        #    self.timer[ = self.sent_time[acked_id + 1] + self.timeout
-            
-        if self.next_seq_num == ack:
-            self.timer = inf()            
+     
 #------------------------------------------------------------------------------
     def handle_timeout(self):
         first_id_unacked = byte_to_id(self.send_base)
@@ -59,32 +51,33 @@ class TCPSender:
         self.udp_send(segment)
         self.next_seq_num += len(self.data[idx])
         
-        self.sent_time[idx] = current_time()
+        self.timer[idx] = current_time() + self.timeout
         
-        #if timer is currently not running
-        if self.timer == inf():
-            self.timer = self.sent_time[idx] + self.timeout
 #------------------------------------------------------------------------------
     def retransmit(self, idx):
         self.udp_send(self.segments[idx])
         
-        self.sent_time[idx:] = [inf()] * (len(data) - idx)
-        self.sent_time[idx] = current_time()
-        self.timer = self.sent_time[idx] + self.timeout
+        timer = current_time() + self.timeout        
+        self.timer[idx:] = [timer] * (self.count - idx)
                
 #------------------------------------------------------------------------------    
     def run(self, data):
         self.data = data
-        self.segments = [''] * len(data)
-        self.timer = [inf()] * len(data)
+        self.count = len(data)
+        self.segments = [''] * self.count 
+        self.timer = [inf()] * self.count
+        
         idx = 0
         while True:
             segment, _ = udp_receive(self.connection[0])
+            timer = self.timer[byte_to_id(self.send_base)]
+            sofar = self.next_seq_num - self.send_base 
+            
             if segment and is_ack(segment):
                 self.handle_ack(segment)
-            elif current_time() >= self.timer:
+            elif current_time() >= timer:
                 self.handle_timeout()
-            elif self.next_seq_num - self.send_base <= self.rwnd:
+            elif sofar + len(self.data[idx]) <= self.rwnd:
                 self.send_segment(idx)
                 idx += 1
 #------------------------------------------------------------------------------    
