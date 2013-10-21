@@ -45,9 +45,10 @@ class TCPSender:
         
         if ack == self.send_base:
             self.duplicate_acks += 1
-            if self.duplicate_acks >= 2:
+            if self.duplicate_acks >= 3:
                 print "fast retransmit", self.send_base
                 self.retransmit(byte_to_id(self.send_base))
+                self.duplicate_acks = 0
             return        
         
         self.duplicate_acks = 0

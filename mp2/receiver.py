@@ -17,35 +17,41 @@ class TCPReceiver:
         #print "send_ack", ack
         segment = build_segment(0, self.acked, 2500, 2)
         self.sock.sendto(segment, self.sender_address)
+    
+    def make_ack(self, segment):
+        return get_seqnum(segment) + len(get_data(segment))
         
     def run(self):
         count = 0
-        idx = 0
+        packet_number = 0
         
         result = []
         received = {}
         while True:
             segment, self.sender_address = self.sock.recvfrom(MAX_SEGMENT_SIZE)
-            idx += 1
+            packet_number += 1
             
             #Packet should be dropped
-            if self.pattern(idx):
+            if self.pattern(packet_number):
                 continue
              
-            #print idx, is_termination(segment), get_seqnum(segment), self.acked
-            print segment
             count += len(get_data(segment))
-            data = get_data(segment)
-            
             seqnum = get_seqnum(segment)
+            idx = byte_to_id(seqnum)
+            received[idx] = segment
+            
+            print seqnum, idx, get_header(segment)
             
             if seqnum == self.acked:
-                self.acked = seqnum + len(data)
-                self.send_ack(self.acked)
+                while idx in received:
+                    result.append(get_data(received[idx]))
+                    idx += 1
                 
-                result.append(data)
+                last_segment = received[idx - 1]
+                self.acked = self.make_ack(last_segment)    
+                self.send_ack(self.acked)    
                 
-                if is_termination(segment):
+                if is_termination(last_segment):
                     break 
             elif seqnum > self.acked:
                 self.send_ack(self.acked)
