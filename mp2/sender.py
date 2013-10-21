@@ -50,9 +50,10 @@ class TCPSender:
         self.retransmit(first_id_unacked)
 
 #------------------------------------------------------------------------------
-    def send_segment(self, idx):
+    def send_segment(self, idx, is_termination):
+        msg_type = 1 if is_termination else 0
         segment = build_segment(self.next_seq_num, 0, 
-            RWND_INIT, 0, self.data[idx])
+            RWND_INIT, msg_type, self.data[idx])
         self.segments[idx] = segment
         
         self.udp_send(segment)
@@ -69,25 +70,24 @@ class TCPSender:
                
 #------------------------------------------------------------------------------    
     def run(self, data):
-        self.data = data
+        self.data = data 
         self.count = len(data)
         self.segments = [''] * self.count 
         self.timer = [inf()] * self.count
         
+        total_length = sum([len(x) for x in data])
         idx = 0
-        while idx < self.count:
+        while self.send_base < total_length:
             segment, _ = self.udp_receive(self.connection[0])
-            if segment:
-                print segment, get_ack(segment)
             timer = self.timer[byte_to_id(self.send_base)]
             sofar = self.next_seq_num - self.send_base 
-            
+
             if segment and is_ack(segment):
                 self.handle_ack(segment)
             elif current_time() >= timer:
                 self.handle_timeout()
-            elif sofar + len(self.data[idx]) <= self.rwnd:
-                self.send_segment(idx)
+            elif idx < self.count and sofar + len(self.data[idx]) <= self.rwnd:
+                self.send_segment(idx, idx == self.count - 1)
                 idx += 1
 #------------------------------------------------------------------------------    
 def main(filename, receiver_domain, receiver_port):
