@@ -7,3 +7,26 @@ Md Tanvir Al Amin (maamin2@illinois.edu)
 Canh Son Nguyen Ba (nguyenb1@illinois.edu)
 
 
+Sender:
+------
+source file: sender.py
+language: python
+
+Receiver:
+--------
+source file: receiver.py
+language: python
+
+How to run:
+----------
+At first run the receiver by executing:
+python receiver.py <receiver-port> <losspattern>
+For example, run:
+python receiver.py 1234 10
+
+Then start the sender by executing:
+python sender.py <receiver-domain-name> <receiver-port>
+For example, assuming that the receiver runs in the same machine:
+python sender.py test2.txt 127.0.0.1 1234
+
+
