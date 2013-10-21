@@ -10,9 +10,13 @@ class TCPSender:
     next_seq_num = INIT_SEQ_NUM 
     segments = []
     
-    timeout = 2000 #ms
+    timeout = 1000 #ms
+    estimatedRTT = 1000 #ms
+    devRTT = 0
     
     duplicate_acks = 0
+    
+    RTT_calculation_phase = "Ready"
     
 #TODO: initialize timer and timeout
     
@@ -30,12 +34,18 @@ class TCPSender:
             return sock.recvfrom(MAX_SEGMENT_SIZE)
         except:
             return None, None        
-
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
         my_socket = socket(AF_INET, SOCK_DGRAM)
         my_socket.setblocking(0)
         return my_socket, target_domain, target_port
+            #------------------------------------------------------------------------------    
+    def update_timeout(self, sampleRTT):
+        self.estimatedRTT = 0.875*self.estimatedRTT + 0.125*sampleRTT
+        self.devRTT = 0.75*self.devRTT + 0.25*abs(sampleRTT - self.estimatedRTT)
+        self.timeout = self.estimatedRTT + 4*self.devRTT
+        print "timeout: ", self.timeout
+        
 #------------------------------------------------------------------------------
     def handle_ack(self, segment):
         
@@ -46,11 +56,18 @@ class TCPSender:
         if ack == self.send_base:
             self.duplicate_acks += 1
             if self.duplicate_acks >= 3:
-                print "fast retransmit", self.send_base
+                #print "fast retransmit", self.send_base
                 self.retransmit(byte_to_id(self.send_base))
                 self.duplicate_acks = 0
+                
+                self.RTT_calculation_phase = "Ready"
             return        
         
+        if (self.RTT_calculation_phase == ack):
+            sampleRTT = current_time() - self.RTT_start
+            self.update_timeout(sampleRTT)
+            self.RTT_calculation_phase = "Ready"
+
         self.duplicate_acks = 0
         self.send_base = ack
         self.rwnd = get_rwnd(segment)
@@ -70,7 +87,12 @@ class TCPSender:
         self.udp_send(segment)
         self.next_seq_num += len(self.data[idx])
         
-        self.timer[idx] = current_time() + self.timeout
+        current = current_time()
+        self.timer[idx] = current + self.timeout
+        
+        if self.RTT_calculation_phase == "Ready":
+            self.RTT_start = current
+            self.RTT_calculation_phase = self.next_seq_num
         
 #------------------------------------------------------------------------------
     def retransmit(self, idx):
