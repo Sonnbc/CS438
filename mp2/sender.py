@@ -10,7 +10,9 @@ class TCPSender:
     next_seq_num = INIT_SEQ_NUM 
     segments = []
     
-    timeout = 5000 #ms
+    timeout = 2000 #ms
+    
+    duplicate_acks = 0
     
 #TODO: initialize timer and timeout
     
@@ -38,9 +40,17 @@ class TCPSender:
     def handle_ack(self, segment):
         
         ack = get_ack(segment)
-        if ack <= self.send_base:
+        if ack < self.send_base:
             return
         
+        if ack == self.send_base:
+            self.duplicate_acks += 1
+            if self.duplicate_acks >= 2:
+                print "fast retransmit", self.send_base
+                self.retransmit(byte_to_id(self.send_base))
+            return        
+        
+        self.duplicate_acks = 0
         self.send_base = ack
         self.rwnd = get_rwnd(segment)
      
