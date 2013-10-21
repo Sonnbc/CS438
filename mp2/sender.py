@@ -15,7 +15,7 @@ class TCPSender:
 #TODO: initialize timer and timeout
     
     def __init__(self, receiver_domain, receiver_port):
-        self.connection = self.make_connection(receiver_domain, receiver_port)    
+        self.connection = self.make_connection(receiver_domain, receiver_port) 
    
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
@@ -34,7 +34,7 @@ class TCPSender:
         my_socket = socket(AF_INET, SOCK_DGRAM)
         my_socket.setblocking(0)
         return my_socket, target_domain, target_port
-#------------------------------------------------------------------------------    
+#------------------------------------------------------------------------------
     def handle_ack(self, segment):
         
         ack = get_ack(segment)
@@ -68,7 +68,7 @@ class TCPSender:
         timer = current_time() + self.timeout        
         self.timer[idx:] = [timer] * (self.count - idx)
                
-#------------------------------------------------------------------------------    
+#------------------------------------------------------------------------------
     def run(self, data):
         self.data = data 
         self.count = len(data)
@@ -91,13 +91,13 @@ class TCPSender:
             elif idx < self.count and sofar + len(self.data[idx]) <= self.rwnd:
                 self.send_segment(idx, idx == self.count - 1)
                 idx += 1
-#------------------------------------------------------------------------------    
+#------------------------------------------------------------------------------
 def main(filename, receiver_domain, receiver_port):
     sender = TCPSender(receiver_domain, receiver_port)
 
     with open(filename) as my_file:
         data = list(iter(lambda: my_file.read(MSS), ''))
     sender.run(data)
-#------------------------------------------------------------------------------    
+#------------------------------------------------------------------------------
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], int(sys.argv[3]))
