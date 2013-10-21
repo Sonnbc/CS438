@@ -18,7 +18,7 @@ class TCPReceiver:
         count = 0
         while True:
             segment, self.sender_address = self.sock.recvfrom(MAX_SEGMENT_SIZE)
-                
+            print segment, is_termination(segment)
             count += len(get_data(segment))
             my_data =get_data(segment)
             print my_data, '**', count , '**'

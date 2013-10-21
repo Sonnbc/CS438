@@ -75,9 +75,11 @@ class TCPSender:
         self.segments = [''] * self.count 
         self.timer = [inf()] * self.count
         
-        total_length = sum([len(x) for x in data])
+        end_at = sum([len(x) for x in data]) + INIT_SEQ_NUM
         idx = 0
-        while self.send_base < total_length:
+
+        print end_at, self.send_base
+        while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
             timer = self.timer[byte_to_id(self.send_base)]
             sofar = self.next_seq_num - self.send_base 
