@@ -10,8 +10,8 @@ class TCPSender:
     next_seq_num = INIT_SEQ_NUM 
     segments = []
     
-    timeout = 1000 #ms
-    estimatedRTT = 1000 #ms
+    timeout = 100 #ms
+    estimatedRTT = 100 #ms
     devRTT = 0
     
     duplicate_acks = 0
