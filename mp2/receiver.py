@@ -29,6 +29,7 @@ class TCPReceiver:
         received = {}
         while True:
             segment, self.sender_address = self.sock.recvfrom(MAX_SEGMENT_SIZE)
+            #print "**", segment, "&&", len(segment), ">>"
             packet_number += 1
             
             #Packet should be dropped
@@ -40,7 +41,7 @@ class TCPReceiver:
             idx = byte_to_id(seqnum)
             received[idx] = segment
             
-            print seqnum, idx, get_header(segment)
+            print idx, get_header(segment)
             
             if seqnum == self.acked:
                 while idx in received:

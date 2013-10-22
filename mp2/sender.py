@@ -25,6 +25,9 @@ class TCPSender:
    
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
+    
+        if len(segment) is 0:
+            raise Exception
         sock, domain, port = self.connection
         sock.sendto(segment, (domain, port))
         
@@ -56,7 +59,6 @@ class TCPSender:
         if ack == self.send_base:
             self.duplicate_acks += 1
             if self.duplicate_acks >= 3:
-                #print "fast retransmit", self.send_base
                 self.retransmit(byte_to_id(self.send_base))
                 self.duplicate_acks = 0
                 
@@ -75,6 +77,7 @@ class TCPSender:
 #------------------------------------------------------------------------------
     def handle_timeout(self):
         first_id_unacked = byte_to_id(self.send_base)
+
         self.retransmit(first_id_unacked)
 
 #------------------------------------------------------------------------------
@@ -98,8 +101,9 @@ class TCPSender:
     def retransmit(self, idx):
         self.udp_send(self.segments[idx])
         
-        timer = current_time() + self.timeout        
-        self.timer[idx:] = [timer] * (self.count - idx)
+        timer = current_time() + self.timeout
+        end = byte_to_id(self.next_seq_num)
+        self.timer[idx:end] = [timer] * (end - idx)
                
 #------------------------------------------------------------------------------
     def run(self, data):

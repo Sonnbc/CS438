@@ -21,7 +21,7 @@ def build_segment(seqnum, ack, rwnd, msg_type, data = ''):
     return str([seqnum, ack, rwnd, msg_type]) + data
 
 def get_header(segment):
-    return eval( segment[:segment.find(']')+1] ) 
+    return eval( segment[:segment.find(']')+1] )
 
 def get_data(segment):
     return segment[segment.find(']')+1:]    
