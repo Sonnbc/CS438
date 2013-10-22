@@ -41,7 +41,7 @@ class TCPReceiver:
             idx = byte_to_id(seqnum)
             received[idx] = segment
             
-            print idx, get_header(segment)
+            #print idx, get_header(segment)
             
             if seqnum == self.acked:
                 while idx in received:

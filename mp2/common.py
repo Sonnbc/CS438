@@ -8,6 +8,11 @@ MAX_SEGMENT_SIZE = 200
 
 current_time = lambda: time.time() * 1000
 
+#------------------------------
+FAST_RECOVERY = "FastRecovery"
+SLOW_START = "SlowStart"
+CONGESTION_AVOIDANCE = "CongestionAvoidance"
+
 # header format
 # [sequence number, ack number, rwnd, msg_type] data
 # [10,4,50,0]this is a data

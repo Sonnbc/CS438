@@ -2,6 +2,7 @@ import sys
 from socket import *
 from common import *
 import errno
+from math import ceil
 
 class TCPSender:
     
@@ -18,6 +19,10 @@ class TCPSender:
     
     RTT_calculation_phase = "Ready"
     
+    cwnd = MSS
+    ssthresh = 1000
+    congestion_phase = SLOW_START
+    
 #TODO: initialize timer and timeout
     
     def __init__(self, receiver_domain, receiver_port):
@@ -25,7 +30,6 @@ class TCPSender:
    
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
-    
         if len(segment) is 0:
             raise Exception
         sock, domain, port = self.connection
@@ -47,7 +51,7 @@ class TCPSender:
         self.estimatedRTT = 0.875*self.estimatedRTT + 0.125*sampleRTT
         self.devRTT = 0.75*self.devRTT + 0.25*abs(sampleRTT - self.estimatedRTT)
         self.timeout = self.estimatedRTT + 4*self.devRTT
-        print "timeout: ", self.timeout
+        #print "timeout: ", self.timeout
         
 #------------------------------------------------------------------------------
     def handle_ack(self, segment):
@@ -58,12 +62,32 @@ class TCPSender:
         
         if ack == self.send_base:
             self.duplicate_acks += 1
+            if self.congestion_phase == FAST_RECOVERY:
+                self.cwnd += MSS
             if self.duplicate_acks >= 3:
-                self.retransmit(byte_to_id(self.send_base))
-                self.duplicate_acks = 0
+                self.congestion_phase = FAST_RECOVERY
+                self.ssthresh = self.cwnd / 2
+                self.cwnd = self.ssthresh + 3*MSS
+                print self.cwnd, current_time()
                 
+                self.duplicate_acks = 0
                 self.RTT_calculation_phase = "Ready"
+                self.retransmit(byte_to_id(self.send_base))
+
             return        
+        
+        #new ack
+        if self.congestion_phase == SLOW_START:
+            self.cwnd += MSS
+            if self.cwnd >= self.ssthresh:
+                self.congestion_phase = CONGESTION_AVOIDANCE
+        elif self.congestion_phase == CONGESTION_AVOIDANCE:
+            self.cwnd += MSS*MSS/self.cwnd
+        elif self.congestion_phase == FAST_RECOVERY:
+            self.cwnd = self.ssthresh
+            self.congestion_phase = CONGESTION_AVOIDANCE
+        
+        print self.cwnd, current_time()
         
         if (self.RTT_calculation_phase == ack):
             sampleRTT = current_time() - self.RTT_start
@@ -76,8 +100,13 @@ class TCPSender:
      
 #------------------------------------------------------------------------------
     def handle_timeout(self):
+        self.congestion_phase = SLOW_START
+        self.ssthresh = self.cwnd / 2
+        self.cwnd = MSS
+        self.duplicate_acks = 0
+        
+        print self.cwnd, current_time()
         first_id_unacked = byte_to_id(self.send_base)
-
         self.retransmit(first_id_unacked)
 
 #------------------------------------------------------------------------------
@@ -104,7 +133,10 @@ class TCPSender:
         timer = current_time() + self.timeout
         end = byte_to_id(self.next_seq_num)
         self.timer[idx:end] = [timer] * (end - idx)
-               
+
+#------------------------------------------------------------------------------
+    def available_to_send(self):
+        return min(self.rwnd, ceil(float(self.cwnd)/MSS)*MSS)               
 #------------------------------------------------------------------------------
     def run(self, data):
         self.data = data 
@@ -115,17 +147,16 @@ class TCPSender:
         end_at = sum([len(x) for x in data]) + INIT_SEQ_NUM
         idx = 0
 
-        print end_at, self.send_base
         while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
             timer = self.timer[byte_to_id(self.send_base)]
-            sofar = self.next_seq_num - self.send_base 
-
+            sofar = self.next_seq_num - self.send_base
             if segment and is_ack(segment):
                 self.handle_ack(segment)
             elif current_time() >= timer:
                 self.handle_timeout()
-            elif idx < self.count and sofar + len(self.data[idx]) <= self.rwnd:
+            elif ( idx < self.count 
+            and sofar+len(self.data[idx]) <= self.available_to_send() ):
                 self.send_segment(idx, idx == self.count - 1)
                 idx += 1
 #------------------------------------------------------------------------------
