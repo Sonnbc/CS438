@@ -57,7 +57,7 @@ class TCPReceiver:
             elif seqnum > self.acked:
                 self.send_ack(self.acked)
                 
-        #print ''.join(result)    
+        print ''.join(result)    
             
 
 def main(port, loss_file):

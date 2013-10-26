@@ -7,6 +7,41 @@ Md Tanvir Al Amin (maamin2@illinois.edu)
 Canh Son Nguyen Ba (nguyenb1@illinois.edu)
 
 
+Implemented Functionality:
+-------------------------
+The code creates UDP sockets for communication. On top of UDP, it implements
+the functionality of TCP.
+
+This code implements the following functionality:
+(i) Congestion avoidance,
+(ii) Fast retransmit and fast recovery,
+(iii) Calculation of RTO and timeouts,
+(iv) Slow start
+
+The code implements the TCP state diagram from the book (Figure 3.52 of 6th Ed)
+The code does not double the timeout interval after a timeout, but
+this functionality will be added soon. 
+
+The data with header format is:
+[sequence number, ack number, rwnd, msg_type] data
+
+msg_type: 
+    0 for normal data, 
+    1 for connection termination (sent from sender to receiver)
+    2 for ack 
+An example segment will look like
+[10,4,50,0]this is a data
+
+The segments are all MSS bytes (100 bytes) in size other than the very last.
+
+We have tested with files that contain just comma separated integer sequences
+(for example test.txt or test2.txt) and checked that the implemented sender
+can correctly send the files and the receiver correctly receives the files.
+The submitted code prints the received file on the receiver side, and on the
+sender side it prints the changing congestion window in following format:
+time, cwnd
+
+
 Sender:
 ------
 source file: sender.py
@@ -27,6 +62,7 @@ python receiver.py 1234 10
 Then start the sender by executing:
 python sender.py <receiver-domain-name> <receiver-port>
 For example, assuming that the receiver runs in the same machine:
-python sender.py test2.txt 127.0.0.1 1234
+python sender.py test2.txt localhost 1234
+
 
 

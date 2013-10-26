@@ -22,12 +22,14 @@ class TCPSender:
     cwnd = MSS
     ssthresh = 1000
     congestion_phase = SLOW_START
-    
+
+    time_origin = 0.0 # when did we start
+
 #TODO: initialize timer and timeout
     
     def __init__(self, receiver_domain, receiver_port):
         self.connection = self.make_connection(receiver_domain, receiver_port) 
-   
+        self.time_origin = current_time()
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
         if len(segment) is 0:
@@ -46,7 +48,7 @@ class TCPSender:
         my_socket = socket(AF_INET, SOCK_DGRAM)
         my_socket.setblocking(0)
         return my_socket, target_domain, target_port
-            #------------------------------------------------------------------------------    
+#------------------------------------------------------------------------------    
     def update_timeout(self, sampleRTT):
         self.estimatedRTT = 0.875*self.estimatedRTT + 0.125*sampleRTT
         self.devRTT = 0.75*self.devRTT + 0.25*abs(sampleRTT - self.estimatedRTT)
@@ -68,7 +70,7 @@ class TCPSender:
                 self.congestion_phase = FAST_RECOVERY
                 self.ssthresh = self.cwnd / 2
                 self.cwnd = self.ssthresh + 3*MSS
-                print self.cwnd, current_time()
+                print "%f,%d" % (current_time() - self.time_origin, self.cwnd)
                 
                 self.duplicate_acks = 0
                 self.RTT_calculation_phase = "Ready"
@@ -87,7 +89,7 @@ class TCPSender:
             self.cwnd = self.ssthresh
             self.congestion_phase = CONGESTION_AVOIDANCE
         
-        print self.cwnd, current_time()
+        print "%f,%d" % (current_time() - self.time_origin, self.cwnd)
         
         if (self.RTT_calculation_phase == ack):
             sampleRTT = current_time() - self.RTT_start
@@ -105,7 +107,7 @@ class TCPSender:
         self.cwnd = MSS
         self.duplicate_acks = 0
         
-        print self.cwnd, current_time()
+        print "%f,%d" % (current_time() - self.time_origin, self.cwnd)
         first_id_unacked = byte_to_id(self.send_base)
         self.retransmit(first_id_unacked)
 
@@ -146,6 +148,9 @@ class TCPSender:
         
         end_at = sum([len(x) for x in data]) + INIT_SEQ_NUM
         idx = 0
+        
+        # print initial congestion window size
+        print "%f,%d" % (current_time() - self.time_origin, self.cwnd)
 
         while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
@@ -161,10 +166,9 @@ class TCPSender:
                 idx += 1
 #------------------------------------------------------------------------------
 def main(filename, receiver_domain, receiver_port):
-    sender = TCPSender(receiver_domain, receiver_port)
-
     with open(filename) as my_file:
         data = list(iter(lambda: my_file.read(MSS), ''))
+    sender = TCPSender(receiver_domain, receiver_port)
     sender.run(data)
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
