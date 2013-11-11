@@ -6,6 +6,7 @@ format=$2 # format can be eps, pdf, png, aqua, x11
 title=$3
 xlabel=$4
 ylabel=$5
+timeupto=$6
 for count in 1
 do
   # delete filename.format
@@ -52,16 +53,16 @@ do
   set ylabel "$ylabel"
   set title "$title"
   
-  set xtics 0.1
-  set ytics 0.2
-  set xrange [0:1]    #set x and y range
-  set yrange [0:1]
+  #set xtics 1
+  set ytics 100
+  set xrange [0:$timeupto]    #set x and y range
+  set yrange [0:]
   
   #set log x
   #set log y
   #set format x "%g"
   #set mxtics 10
-  set mytics 4
+  set mytics 2
 
   set style line 1 lt rgb "#A00000" lw 1 pt 1
   set style line 2 lt rgb "#00A000" lw 1 pt 6
@@ -72,11 +73,8 @@ do
   #set key top left
 
   #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
-  plot "$iter" using (\$1):(\$2) with l ls 2
-  #plot "$iter.avg" using 1:2 w lines ls 1 title "Average", \
-  #     "$iter.dat" using 1:2 w points ls 3 title "Raw Measurement"
-  #plot "$iter.hist" using 1:2 with lp
-  #plot  "1.hist" using ($1+0.25):($2+1):2 with labels
+  plot "$iter" using (\$1):(\$2) with l ls 1, \
+       "$iter" using 1:2 with p pointsize 0.35 pt 7
   #plot bar chart and the value labels on the bars
 EOF
 
