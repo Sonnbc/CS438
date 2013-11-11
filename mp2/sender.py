@@ -6,7 +6,7 @@ from math import ceil
 
 class TCPSender:
     
-    def __init__(self, receiver_domain, receiver_port):
+    def __init__(self, receiver_domain, receiver_port, cwnd_file):
         self.connection = self.make_connection(receiver_domain, receiver_port) 
         self.time_origin = current_time()
         
@@ -24,11 +24,12 @@ class TCPSender:
         
         self.RTT_calculation_phase = "Ready"
         
-        self.cwnd = MSS
+        self.time_origin = current_time() # when we started
+
+        self.cwnd_file = cwnd_file
+        self.set_cwnd(MSS)
         self.ssthresh = 1000
         self.congestion_phase = SLOW_START
-
-        self.time_origin = current_time() # when we started
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
         if len(segment) is 0:
@@ -42,6 +43,10 @@ class TCPSender:
             return sock.recvfrom(MAX_SEGMENT_SIZE)
         except:
             return None, None        
+#------------------------------------------------------------------------------            
+    def set_cwnd(self, value):
+        self.cwnd = value
+        print >> self.cwnd_file, "%f %d" % (current_time() - self.time_origin, self.cwnd)
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
         my_socket = socket(AF_INET, SOCK_DGRAM)
@@ -64,12 +69,11 @@ class TCPSender:
         if ack == self.send_base:
             self.duplicate_acks += 1
             if self.congestion_phase == FAST_RECOVERY:
-                self.cwnd += MSS
+                self.set_cwnd(self.cwnd + MSS)
             if self.duplicate_acks >= 3:
                 self.congestion_phase = FAST_RECOVERY
                 self.ssthresh = self.cwnd / 2
-                self.cwnd = self.ssthresh + 3*MSS
-                print "%f, %d" % (current_time() - self.time_origin, self.cwnd)
+                self.set_cwnd(self.ssthresh + 3*MSS)
                 
                 self.duplicate_acks = 0
                 self.RTT_calculation_phase = "Ready"
@@ -79,16 +83,14 @@ class TCPSender:
         
         #new ack
         if self.congestion_phase == SLOW_START:
-            self.cwnd += MSS
+            self.set_cwnd(self.cwnd + MSS)
             if self.cwnd >= self.ssthresh:
                 self.congestion_phase = CONGESTION_AVOIDANCE
         elif self.congestion_phase == CONGESTION_AVOIDANCE:
-            self.cwnd += MSS*MSS/self.cwnd
+            self.set_cwnd(self.cwnd + MSS*MSS/self.cwnd)
         elif self.congestion_phase == FAST_RECOVERY:
-            self.cwnd = self.ssthresh
+            self.set_cwnd(self.ssthresh)
             self.congestion_phase = CONGESTION_AVOIDANCE
-        
-        print "%f, %d" % (current_time() - self.time_origin, self.cwnd)
         
         if (self.RTT_calculation_phase == ack):
             sampleRTT = current_time() - self.RTT_start
@@ -103,10 +105,9 @@ class TCPSender:
     def handle_timeout(self):
         self.congestion_phase = SLOW_START
         self.ssthresh = self.cwnd / 2
-        self.cwnd = MSS
+        self.set_cwnd(MSS)
         self.duplicate_acks = 0
         
-        print "%f, %d" % (current_time() - self.time_origin, self.cwnd)
         first_id_unacked = byte_to_id(self.send_base)
         
         #double timeout var then retransmit in case of a timeout event
@@ -151,9 +152,6 @@ class TCPSender:
         end_at = sum([len(x) for x in data]) + INIT_SEQ_NUM
         idx = 0
         
-        # print initial congestion window size
-        print "%f, %d" % (current_time() - self.time_origin, self.cwnd)
-
         while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
             timer = self.timer[byte_to_id(self.send_base)]
@@ -170,8 +168,10 @@ class TCPSender:
 def main(filename, receiver_domain, receiver_port):
     with open(filename) as my_file:
         data = list(iter(lambda: my_file.read(MSS), ''))
-    sender = TCPSender(receiver_domain, receiver_port)
-    sender.run(data)
+        
+    with open('cwnd', 'w') as cwnd_file:    
+        sender = TCPSender(receiver_domain, receiver_port, cwnd_file)
+        sender.run(data)
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], int(sys.argv[3]))
