@@ -5,13 +5,15 @@ import time
 
 class TCPReceiver:
 
-    acked = INIT_SEQ_NUM
-    
     def __init__(self, port, pattern):
         self.sock = socket(AF_INET, SOCK_DGRAM)
         self.sock.bind(('', port))
         
         self.pattern = pattern
+        
+        self.acked = INIT_SEQ_NUM
+        self.last_acked = current_time()
+        
     
     def send_ack(self, ack):
         #print "send_ack", ack

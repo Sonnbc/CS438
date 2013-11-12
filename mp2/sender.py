@@ -16,8 +16,8 @@ class TCPSender:
         self.segments = []
         
         #TODO: initialize timer and timeout???
-        self.timeout = 100 #ms
-        self.estimatedRTT = 100 #ms
+        self.timeout = 10 #ms
+        self.estimatedRTT = 10 #ms
         self.devRTT = 0
         
         self.duplicate_acks = 0
@@ -27,11 +27,12 @@ class TCPSender:
         self.time_origin = current_time() # when we started
 
         self.cwnd_file = cwnd_file
-        self.set_cwnd(MSS)
-        self.ssthresh = 1000
         self.congestion_phase = SLOW_START
+        self.ssthresh = 1000
+        self.set_cwnd(MSS)   
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
+        #print '------- SEND -----', get_seqnum(segment), self.timeout
         if len(segment) is 0:
             raise Exception
         sock, domain, port = self.connection
@@ -46,7 +47,8 @@ class TCPSender:
 #------------------------------------------------------------------------------            
     def set_cwnd(self, value):
         self.cwnd = value
-        print >> self.cwnd_file, "%f %d" % (current_time() - self.time_origin, self.cwnd)
+        print >> self.cwnd_file, "%f %d %f %s" % (current_time() - self.time_origin, self.cwnd, self.timeout, self.congestion_phase)
+        #print "%f %d" % (current_time() - self.time_origin, self.cwnd)
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
         my_socket = socket(AF_INET, SOCK_DGRAM)
@@ -66,11 +68,17 @@ class TCPSender:
         if ack < self.send_base:
             return
         
+        #print "---ack--------", ack, current_time() - self.time_origin
         if ack == self.send_base:
             self.duplicate_acks += 1
             if self.congestion_phase == FAST_RECOVERY:
                 self.set_cwnd(self.cwnd + MSS)
-            if self.duplicate_acks >= 3:
+                
+                self.duplicate_acks = 0
+                self.RTT_calculation_phase = "Ready"
+                self.retransmit(byte_to_id(self.send_base))
+                
+            elif self.duplicate_acks >= 3:
                 self.congestion_phase = FAST_RECOVERY
                 self.ssthresh = self.cwnd / 2
                 self.set_cwnd(self.ssthresh + 3*MSS)
@@ -92,7 +100,7 @@ class TCPSender:
             self.set_cwnd(self.ssthresh)
             self.congestion_phase = CONGESTION_AVOIDANCE
         
-        if (self.RTT_calculation_phase == ack):
+        if (self.RTT_calculation_phase <= ack):
             sampleRTT = current_time() - self.RTT_start
             self.update_timeout(sampleRTT)
             self.RTT_calculation_phase = "Ready"
@@ -138,6 +146,8 @@ class TCPSender:
         timer = current_time() + self.timeout
         end = byte_to_id(self.next_seq_num)
         self.timer[idx:end] = [timer] * (end - idx)
+        
+        self.RTT_start = current_time()
 
 #------------------------------------------------------------------------------
     def available_to_send(self):

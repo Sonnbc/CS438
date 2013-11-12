@@ -6,7 +6,8 @@ format=$2 # format can be eps, pdf, png, aqua, x11
 title=$3
 xlabel=$4
 ylabel=$5
-timeupto=$6
+timefrom=$6
+timeupto=$7
 for count in 1
 do
   # delete filename.format
@@ -54,15 +55,15 @@ do
   set title "$title"
   
   #set xtics 1
-  set ytics 100
-  set xrange [0:$timeupto]    #set x and y range
+  #set ytics 100
+  set xrange [$timefrom:$timeupto]    #set x and y range
   set yrange [0:]
   
   #set log x
   #set log y
   #set format x "%g"
   #set mxtics 10
-  set mytics 2
+  #set mytics 2
 
   set style line 1 lt rgb "#A00000" lw 1 pt 1
   set style line 2 lt rgb "#00A000" lw 1 pt 6
@@ -75,6 +76,7 @@ do
   #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
   plot "$iter" using (\$1):(\$2) with l ls 1, \
        "$iter" using 1:2 with p pointsize 0.35 pt 7
+  plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
   #plot bar chart and the value labels on the bars
 EOF
 
