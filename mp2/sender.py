@@ -6,7 +6,7 @@ from math import ceil
 
 class TCPSender:
     
-    def __init__(self, receiver_domain, receiver_port, cwnd_file):
+    def __init__(self, receiver_domain, receiver_port, cwnd_file, trace_file, log_file):
         self.connection = self.make_connection(receiver_domain, receiver_port) 
         self.time_origin = current_time()
         
@@ -27,6 +27,8 @@ class TCPSender:
         self.time_origin = current_time() # when we started
 
         self.cwnd_file = cwnd_file
+        self.trace_file = trace_file
+        self.log_file = log_file
         self.congestion_phase = SLOW_START
         self.ssthresh = 1000
         self.set_cwnd(MSS)   
@@ -47,8 +49,16 @@ class TCPSender:
 #------------------------------------------------------------------------------            
     def set_cwnd(self, value):
         self.cwnd = value
-        print >> self.cwnd_file, "%f %d %f %s" % (current_time() - self.time_origin, self.cwnd, self.timeout, self.congestion_phase)
-        #print "%f %d" % (current_time() - self.time_origin, self.cwnd)
+        print >> self.cwnd_file, "%f %d" %\
+                (current_time() - self.time_origin, 
+                self.cwnd)
+        print >> self.log_file, "%f %d %s %f %f %f" %\
+                (current_time() - self.time_origin, 
+                self.cwnd, 
+                self.congestion_phase, 
+                self.estimatedRTT, 
+                self.devRTT, 
+                self.timeout)
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
         my_socket = socket(AF_INET, SOCK_DGRAM)
@@ -65,6 +75,9 @@ class TCPSender:
     def handle_ack(self, segment):
         
         ack = get_ack(segment)
+        print >> self.trace_file, "%f %d" %\
+                (current_time() - self.time_origin,
+                ack - 1)
         if ack < self.send_base:
             return
         
@@ -179,8 +192,8 @@ def main(filename, receiver_domain, receiver_port):
     with open(filename) as my_file:
         data = list(iter(lambda: my_file.read(MSS), ''))
         
-    with open('cwnd', 'w') as cwnd_file:    
-        sender = TCPSender(receiver_domain, receiver_port, cwnd_file)
+    with open('cwnd', 'w') as cwnd_file, open('trace', 'w') as trace_file, open('log', 'w') as log_file:    
+        sender = TCPSender(receiver_domain, receiver_port, cwnd_file, trace_file, log_file)
         sender.run(data)
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
