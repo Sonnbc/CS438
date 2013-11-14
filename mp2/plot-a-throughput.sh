@@ -22,9 +22,9 @@ do
   
   # set the terminal
   if [ "$format" = "pdf" ]; then
-    PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded"
+    #PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded fontscale 1.0"
     # Slightly bigger and more bold, better for presentation
-    #PT="$PT pdfcairo font \"Gill Sans,9\" linewidth 4 rounded fontscale 1.0
+    PT="$PT pdfcairo font \"Gill Sans,9\" linewidth 4 rounded fontscale 1.0"
   elif [ "$format" = "png" ]; then
     PT="pngcairo size 3600, 1600 font \"Gill Sans,40\" linewidth 3 rounded"
   elif [ "$format" = "eps" ]; then
@@ -68,10 +68,10 @@ do
   #set mxtics 10
   set mytics 2
 
-  set style line 1 lt rgb "#A00000" lw 2 pt 1
-  set style line 2 lt rgb "#00A000" lw 2 pt 6
-  set style line 3 lt rgb "#5060D0" lw 2 pt 2
-  set style line 4 lt rgb "#F25900" lw 2 pt 9
+  set style line 1 lt rgb "#A00000" lw 1 pt 1
+  set style line 2 lt rgb "#00A000" lw 1 pt 6
+  set style line 3 lt rgb "#5060D0" lw 1 pt 2
+  set style line 4 lt rgb "#F25900" lw 1 pt 9
 
   set key off
   set key top left

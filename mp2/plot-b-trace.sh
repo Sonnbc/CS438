@@ -22,9 +22,9 @@ do
   
   # set the terminal
   if [ "$format" = "pdf" ]; then
-    PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded"
+    #PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded fontscale 1.0"
     # Slightly bigger and more bold, better for presentation
-    #PT="$PT pdfcairo font \"Gill Sans,9\" linewidth 4 rounded fontscale 1.0
+    PT="$PT pdfcairo font \"Gill Sans,9\" linewidth 2 rounded fontscale 1.0"
   elif [ "$format" = "png" ]; then
     PT="pngcairo size 3600, 1600 font \"Gill Sans,40\" linewidth 3 rounded"
   elif [ "$format" = "eps" ]; then
@@ -59,8 +59,8 @@ do
   
   #set xtics 5 
   #set ytics 100
-  #set xrange [0:50]    #set x and y range
-  set yrange [0:]
+  set xrange [0:]    #set x and y range
+  #set yrange [0:]
   
   #set log x
   #set log y
@@ -78,12 +78,11 @@ do
 
   #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
   set title 'Loss Pattern 0'
-  plot "$iter-0" using 1:(\$2+1) with lp ls 1 ps 0.25 #title 'Loss Pattern 0'
+  plot "$iter-0" using 1:(\$2+1) with lp ls 1 ps 0.2 #title 'Loss Pattern 0'
   set title 'Loss Pattern 1'
-  plot "$iter-1" using 1:(\$2+1) with lp ls 2 ps 0.25 #title 'Loss Pattern 1'
+  plot "$iter-1" using 1:(\$2+1) with lp ls 2 ps 0.2 #title 'Loss Pattern 1'
   set title 'Loss Pattern 2'
-  set xrange [0:100]
-  plot "$iter-2" using 1:(\$2+1) with lp ls 3 ps 0.25 #title 'Loss Pattern 2'
+  plot "$iter-2" using 1:(\$2+1) with lp ls 3 ps 0.2 #title 'Loss Pattern 2'
   #plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
   #plot bar chart and the value labels on the bars
 EOF
