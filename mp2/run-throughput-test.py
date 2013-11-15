@@ -26,7 +26,7 @@ def main():
                 # wait 1 second 
                 time.sleep(delay_time)
                 os.system('python sender.py ' + file_name + ' ' + receiver_domain_name + ' ' + receiver_port)
-                #time.sleep(delay_time2)
+                time.sleep(delay_time2)
 
                 with open('trace') as tf:
                     last_line = tailer.tail(tf, 1)
