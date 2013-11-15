@@ -1,7 +1,7 @@
 #!/bin/sh
 
 i=0
-iter="a-throughput" # data file name prefix
+iter="a-throughput.kopottakha" # data file name prefix
 format="pdf" # format can be eps, pdf, png, aqua, x11
 style="2"
 title="Throughput vs. Loss Pattern"
@@ -68,19 +68,20 @@ do
   #set mxtics 10
   set mytics 2
 
-  set style line 1 lt rgb "#A00000" lw 1 pt 1
-  set style line 2 lt rgb "#00A000" lw 1 pt 6
-  set style line 3 lt rgb "#5060D0" lw 1 pt 2
-  set style line 4 lt rgb "#F25900" lw 1 pt 9
+  set style line 1 lt rgb "#A00000" lw 1 pt 1 ps 0.5
+  set style line 2 lt rgb "#00A000" lw 1 pt 6 ps 0.5
+  set style line 3 lt rgb "#5060D0" lw 1 pt 2 ps 0.5
+  set style line 4 lt rgb "#F25900" lw 1 pt 9 ps 0.5
 
-  set key off
-  set key top left
+  #set key off
+  set key bottom right
 
-  #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
-  plot "$iter" using (\$1):(\$3 * 8000 / \$2 / 1000000) with lp ls 1 title '1 KB', \
-       "$iter" using (\$1):(\$5 * 8000 / \$4 / 1000000) with lp ls 2 title '100 KB', \
-       "$iter" using (\$1):(\$7 * 8000 / \$6 / 1000000) with lp ls 3 title '1000 KB'
-  #plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
+  plot "$iter" using 1:(\$2/1000000)  with l ls 1 title '1 KB', \
+    "$iter" using 1:(\$2/1000000):(\$3/1000000):(\$4/1000000) with yerrorbars ls 1 title '',\
+    "$iter" using 1:(\$5/1000000) with l ls 2 title '100 KB', \
+    "$iter" using 1:(\$5/1000000):(\$6/1000000):(\$7/1000000) with yerrorbars ls 2 title '', \
+    "$iter" using 1:(\$8/1000000) with l ls 3 title '1000 KB', \
+    "$iter" usin 1:(\$8/1000000):(\$9/1000000):(\$10/1000000) with yerrorbars ls 3 title ''
   #plot bar chart and the value labels on the bars
 EOF
 done
