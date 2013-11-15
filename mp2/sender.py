@@ -14,8 +14,8 @@ class TCPSender:
         self.segments = []
         
         #TODO: initialize timer and timeout???
-        self.timeout = 1 #ms
-        self.estimatedRTT = 1 #ms
+        self.timeout = 10 #ms
+        self.estimatedRTT = 10 #ms
         self.devRTT = 0
         
         self.duplicate_acks = 0
