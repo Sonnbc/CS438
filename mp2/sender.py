@@ -8,30 +8,26 @@ class TCPSender:
     
     def __init__(self, receiver_domain, receiver_port, cwnd_file, trace_file, log_file):
         self.connection = self.make_connection(receiver_domain, receiver_port) 
-        self.time_origin = current_time()
-        
         self.rwnd = RWND_INIT
         self.send_base = INIT_SEQ_NUM
         self.next_seq_num = INIT_SEQ_NUM 
         self.segments = []
         
         #TODO: initialize timer and timeout???
-        self.timeout = 10 #ms
-        self.estimatedRTT = 10 #ms
+        self.timeout = 1 #ms
+        self.estimatedRTT = 1 #ms
         self.devRTT = 0
         
         self.duplicate_acks = 0
         
         self.RTT_calculation_phase = "Ready"
         
-        self.time_origin = current_time() # when we started
-
         self.cwnd_file = cwnd_file
         self.trace_file = trace_file
         self.log_file = log_file
         self.congestion_phase = SLOW_START
         self.ssthresh = 1000
-        self.set_cwnd(MSS)   
+        self.cwnd = MSS
 #------------------------------------------------------------------------------
     def udp_send(self, segment):
         #print '------- SEND -----', get_seqnum(segment), self.timeout
@@ -52,13 +48,10 @@ class TCPSender:
         print >> self.cwnd_file, "%f %d" %\
                 (current_time() - self.time_origin, 
                 self.cwnd)
-        print >> self.log_file, "%f %d %s %f %f %f" %\
+        print >> self.log_file, "CWND %f %d %s" %\
                 (current_time() - self.time_origin, 
                 self.cwnd, 
-                self.congestion_phase, 
-                self.estimatedRTT, 
-                self.devRTT, 
-                self.timeout)
+                self.congestion_phase) 
 #------------------------------------------------------------------------------
     def make_connection(self, target_domain, target_port):
         my_socket = socket(AF_INET, SOCK_DGRAM)
@@ -70,12 +63,19 @@ class TCPSender:
         self.devRTT = 0.75*self.devRTT + 0.25*abs(sampleRTT - self.estimatedRTT)
         self.timeout = self.estimatedRTT + 4*self.devRTT
         #print "timeout: ", self.timeout
-        
+        print >> self.log_file, "RTTU %f %f %f %f" %\
+                (current_time() - self.time_origin,
+                self.estimatedRTT,
+                self.devRTT,
+                self.timeout)
 #------------------------------------------------------------------------------
     def handle_ack(self, segment):
         
         ack = get_ack(segment)
         print >> self.trace_file, "%f %d" %\
+                (current_time() - self.time_origin,
+                ack - 1)
+        print >> self.log_file, "ACKN %f %d" %\
                 (current_time() - self.time_origin,
                 ack - 1)
         if ack < self.send_base:
@@ -110,8 +110,8 @@ class TCPSender:
         elif self.congestion_phase == CONGESTION_AVOIDANCE:
             self.set_cwnd(self.cwnd + MSS*MSS/self.cwnd)
         elif self.congestion_phase == FAST_RECOVERY:
-            self.set_cwnd(self.ssthresh)
             self.congestion_phase = CONGESTION_AVOIDANCE
+            self.set_cwnd(self.ssthresh)
         
         if (self.RTT_calculation_phase <= ack):
             sampleRTT = current_time() - self.RTT_start
@@ -124,15 +124,18 @@ class TCPSender:
      
 #------------------------------------------------------------------------------
     def handle_timeout(self):
+        #double timeout var then retransmit in case of a timeout event
+        self.timeout *= 2
         self.congestion_phase = SLOW_START
         self.ssthresh = self.cwnd / 2
-        self.set_cwnd(MSS)
         self.duplicate_acks = 0
+        print >> self.log_file, "TOUT %f %f" %\
+                (current_time() - self.time_origin,
+                self.timeout)
+        self.set_cwnd(MSS)
         
         first_id_unacked = byte_to_id(self.send_base)
         
-        #double timeout var then retransmit in case of a timeout event
-        self.timeout *= 2
         self.retransmit(first_id_unacked)
 
 #------------------------------------------------------------------------------
@@ -142,6 +145,10 @@ class TCPSender:
             RWND_INIT, msg_type, self.data[idx])
         self.segments[idx] = segment
         
+        print >> self.log_file, "SND0 %f %d %s" %\
+                (current_time() - self.time_origin,
+                self.next_seq_num,
+                self.congestion_phase)
         self.udp_send(segment)
         self.next_seq_num += len(self.data[idx])
         
@@ -154,6 +161,10 @@ class TCPSender:
         
 #------------------------------------------------------------------------------
     def retransmit(self, idx):
+        print >> self.log_file, "SND1 %f %d %s" %\
+                (current_time() - self.time_origin,
+                self.send_base,
+                self.congestion_phase)
         self.udp_send(self.segments[idx])
         
         timer = current_time() + self.timeout
@@ -175,6 +186,10 @@ class TCPSender:
         end_at = sum([len(x) for x in data]) + INIT_SEQ_NUM
         idx = 0
         
+        self.time_origin = current_time() #start timing
+        self.set_cwnd(MSS) # initial value         
+        self.update_timeout(self.estimatedRTT) # initial value
+
         while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
             timer = self.timer[byte_to_id(self.send_base)]
