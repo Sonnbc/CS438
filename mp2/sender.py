@@ -196,7 +196,7 @@ class TCPSender:
             # original
             #timer = self.timer[byte_to_id(self.send_base)]
             
-            # experimental
+            # experimental started from timer to timer_start
             sb = byte_to_id(self.send_base)
             ns = byte_to_id(self.next_seq_num)
             if ns > sb:
