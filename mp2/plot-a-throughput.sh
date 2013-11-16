@@ -1,7 +1,7 @@
 #!/bin/sh
 
 i=0
-iter="a-throughput" # data file name prefix
+iter="a-throughput.kopottakha" # data file name prefix
 format="pdf" # format can be eps, pdf, png, aqua, x11
 style="2"
 title="Throughput vs. Loss Pattern"

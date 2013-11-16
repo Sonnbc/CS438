@@ -153,7 +153,7 @@ class TCPSender:
         self.next_seq_num += len(self.data[idx])
         
         current = current_time()
-        self.timer[idx] = current + self.timeout
+        self.timer_start[idx] = current
         
         if self.RTT_calculation_phase == "Ready":
             self.RTT_start = current
@@ -167,9 +167,9 @@ class TCPSender:
                 self.congestion_phase)
         self.udp_send(self.segments[idx])
         
-        timer = current_time() + self.timeout
+        timer_start = current_time()
         end = byte_to_id(self.next_seq_num)
-        self.timer[idx:end] = [timer] * (end - idx)
+        self.timer_start[idx:end] = [timer_start] * (end - idx)
         
         self.RTT_start = current_time()
 
@@ -181,7 +181,7 @@ class TCPSender:
         self.data = data 
         self.count = len(data)
         self.segments = [''] * self.count 
-        self.timer = [inf()] * self.count
+        self.timer_start = [inf()] * self.count
         
         end_at = sum([len(x) for x in data]) + INIT_SEQ_NUM
         idx = 0
@@ -192,23 +192,13 @@ class TCPSender:
 
         while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
+            # timer_start of lowest unackowledged packet
+            timer_start = self.timer_start[byte_to_id(self.send_base)]
             
-            # original
-            #timer = self.timer[byte_to_id(self.send_base)]
-            
-            # experimental started from timer to timer_start
-            sb = byte_to_id(self.send_base)
-            ns = byte_to_id(self.next_seq_num)
-            if ns > sb:
-                timer = min(self.timer[sb:ns]) #experimental
-            else:
-                timer = self.timer[sb]
-
-
             sofar = self.next_seq_num - self.send_base
             if segment and is_ack(segment):
                 self.handle_ack(segment)
-            elif current_time() >= timer:
+            elif current_time() >= timer_start + self.timeout:
                 self.handle_timeout()
             elif ( idx < self.count 
             and sofar+len(self.data[idx]) <= self.available_to_send() ):
