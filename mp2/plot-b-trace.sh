@@ -62,8 +62,6 @@ do
   set xrange [0:]    #set x and y range
   #set yrange [0:]
   
-  #set log x
-  #set log y
   #set format y "10^{%g}"
   #set mxtics 10
   set mytics 2
@@ -76,15 +74,12 @@ do
   unset key
   #set key top left
 
-  #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
   set title 'Loss Pattern 0'
   plot "$iter-0" using 1:(\$2+1) with lp ls 1 ps 0.2 #title 'Loss Pattern 0'
   set title 'Loss Pattern 1'
   plot "$iter-1" using 1:(\$2+1) with lp ls 2 ps 0.2 #title 'Loss Pattern 1'
   set title 'Loss Pattern 2'
   plot "$iter-2" using 1:(\$2+1) with lp ls 3 ps 0.2 #title 'Loss Pattern 2'
-  #plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
-  #plot bar chart and the value labels on the bars
 EOF
 done
 

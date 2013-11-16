@@ -4,32 +4,25 @@ i=0
 iter=$1 # data file name prefix
 format=$2 # format can be eps, pdf, png, aqua, x11
 style=$3
-title=$4
-xlabel=$5
-ylabel=$6
-timefrom=$7
-timeupto=$8
+linewidth=$4
+title=$5
+xlabel=$6
+ylabel=$7
+timefrom=$8
+timeupto=$9
 for count in 1
 do
-  # delete filename.format
-  rm -f "$iter.$format"
-  # for eps we have its pdf version too
-  if [ "$format" = "eps" ]; then
-    rm -f "$iter.pdf" 
-  fi
+  rm -rf "$iter.$format"
+  rm -rf "$iter.pdf" 
   echo "Drawing $iter.$format"
   i=`expr $i+1`
   
-  # set the terminal
   if [ "$format" = "pdf" ]; then
-    #PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded fontscale 1.0"
-    # Slightly bigger and more bold, better for presentation
-    PT="pdfcairo font \"Gill Sans,9\" linewidth 2 rounded fontscale 1.0"
+    PT="pdfcairo font \"Gill Sans,9\" linewidth $linewidth rounded fontscale 1.0"
   elif [ "$format" = "png" ]; then
-    PT="pngcairo size 3600, 1600 font \"Gill Sans,40\" linewidth 3 rounded"
+    PT="pngcairo size 3600, 1600 font \"Gill Sans,40\" linewidth $linewidth rounded"
   elif [ "$format" = "eps" ]; then
-    #PT="postscript eps size 3.5, 2.62 enhanced color font 'Helvetica,20' linewidth 3"
-    PT="postscript eps enhanced color font 'Helvetica,20' linewidth 3"
+    PT="postscript eps enhanced color font 'Helvetica,20' linewidth $linewidth"
   
   else
     PT="$format"
@@ -62,25 +55,19 @@ do
   set xrange [$timefrom:$timeupto]    #set x and y range
   set yrange [0:]
   
-  #set log x
-  #set log y
   #set format x "%g"
   #set mxtics 10
   #set mytics 2
 
   set style line 1 lt rgb "#A00000" lw 1 pt 1
   set style line 2 lt rgb "#00A000" lw 1 pt 6
-  set style line 3 lt rgb "#5060D0" lw 1 pt 2
+  set style line 3 lt rgb "#5060D0" lw 1  pt 2
   set style line 4 lt rgb "#F25900" lw 1 pt 9
 
   set key off
   #set key top left
 
-  #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
-  plot "$iter" using (\$1):(\$2) with lp ls $style pt 7 ps 0.2
-       #"$iter" using 1:2 with p pointsize 0.4 pt 1 linecolor rgb "#5060D0"
-  #plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
-  #plot bar chart and the value labels on the bars
+  plot "$iter" using (\$1):(\$2) with lp ls $style ps 0.1 
 EOF
 done
 
