@@ -5,11 +5,12 @@ iter=$1 # data file name prefix
 format=$2 # format can be eps, pdf, png, aqua, x11
 style=$3
 linewidth=$4
-title=$5
-xlabel=$6
-ylabel=$7
-timefrom=$8
-timeupto=$9
+pointsize=$5
+title=$6
+xlabel=$7
+ylabel=$8
+timefrom=$9
+timeupto=${10}
 for count in 1
 do
   rm -rf "$iter.$format"
@@ -23,7 +24,6 @@ do
     PT="pngcairo size 3600, 1600 font \"Gill Sans,40\" linewidth $linewidth rounded"
   elif [ "$format" = "eps" ]; then
     PT="postscript eps enhanced color font 'Helvetica,20' linewidth $linewidth"
-  
   else
     PT="$format"
   fi
@@ -67,7 +67,7 @@ do
   set key off
   #set key top left
 
-  plot "$iter" using (\$1):(\$2) with lp ls $style ps 0.1 
+  plot "$iter" using (\$1):(\$2) with lp ls $style ps $pointsize 
 EOF
 done
 
