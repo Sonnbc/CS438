@@ -192,7 +192,19 @@ class TCPSender:
 
         while self.send_base < end_at:
             segment, _ = self.udp_receive(self.connection[0])
-            timer = self.timer[byte_to_id(self.send_base)]
+            
+            # original
+            #timer = self.timer[byte_to_id(self.send_base)]
+            
+            # experimental
+            sb = byte_to_id(self.send_base)
+            ns = byte_to_id(self.next_seq_num)
+            if ns > sb:
+                timer = min(self.timer[sb:ns]) #experimental
+            else:
+                timer = self.timer[sb]
+
+
             sofar = self.next_seq_num - self.send_base
             if segment and is_ack(segment):
                 self.handle_ack(segment)
