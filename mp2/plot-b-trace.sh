@@ -75,6 +75,7 @@ do
   #set key top left
 
   set title 'Loss Pattern 0'
+  set label "m = 20" at 10, 3000 front tc rgb "#123456"
   plot "$iter-0" using 1:(\$2+1) with lp ls 1 ps 0.2 #title 'Loss Pattern 0'
   set title 'Loss Pattern 1'
   plot "$iter-1" using 1:(\$2+1) with lp ls 2 ps 0.2 #title 'Loss Pattern 1'

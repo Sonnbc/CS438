@@ -104,9 +104,9 @@ class TCPSender:
         
         #new ack
         if self.congestion_phase == SLOW_START:
-            self.set_cwnd(self.cwnd + MSS)
-            if self.cwnd >= self.ssthresh:
+            if self.cwnd + MSS >= self.ssthresh:
                 self.congestion_phase = CONGESTION_AVOIDANCE
+            self.set_cwnd(self.cwnd + MSS)
         elif self.congestion_phase == CONGESTION_AVOIDANCE:
             self.set_cwnd(self.cwnd + MSS*MSS/self.cwnd)
         elif self.congestion_phase == FAST_RECOVERY:
