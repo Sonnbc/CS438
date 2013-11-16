@@ -57,9 +57,9 @@ class TCPReceiver:
                 if is_termination(last_segment):
                     break 
             elif seqnum > self.acked:
-                self.send_ack(self.acked)
-                
-        print ''.join(result)    
+                self.send_ack(self.acked) 
+        
+        print ''.join(result)
             
 
 def main(port, loss_file):

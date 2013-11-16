@@ -22,9 +22,9 @@ do
   
   # set the terminal
   if [ "$format" = "pdf" ]; then
-    PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded"
+    #PT="pdfcairo font \"Gill Sans,7\" linewidth 3 rounded fontscale 1.0"
     # Slightly bigger and more bold, better for presentation
-    #PT="$PT pdfcairo font \"Gill Sans,9\" linewidth 4 rounded fontscale 1.0
+    PT="pdfcairo font \"Gill Sans,9\" linewidth 2 rounded fontscale 1.0"
   elif [ "$format" = "png" ]; then
     PT="pngcairo size 3600, 1600 font \"Gill Sans,40\" linewidth 3 rounded"
   elif [ "$format" = "eps" ]; then
@@ -77,7 +77,7 @@ do
   #set key top left
 
   #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
-  plot "$iter" using (\$1):(\$2) with l ls $style
+  plot "$iter" using (\$1):(\$2) with lp ls $style pt 7 ps 0.2
        #"$iter" using 1:2 with p pointsize 0.4 pt 1 linecolor rgb "#5060D0"
   #plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
   #plot bar chart and the value labels on the bars
