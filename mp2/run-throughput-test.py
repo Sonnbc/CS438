@@ -1,5 +1,5 @@
 
-import os, time, tailer, scipy, sys
+import os, time, scipy, sys
 
 def main():
     
@@ -28,9 +28,10 @@ def main():
                 os.system('python sender.py ' + file_name + ' ' + receiver_domain_name + ' ' + receiver_port)
                 time.sleep(delay_time2)
 
-                with open('trace') as tf:
-                    last_line = tailer.tail(tf, 1)
-                time_req = float(last_line[0].split(' ')[0])
+                # read the last line of trace file
+                last_line = os.popen("tail -n 1 %s" % 'trace').read()[:-1]
+                
+                time_req = float(last_line.split(' ')[0])
                 time_reqs.append(time_req)
                 throughput = file_size * 8000.0 / time_req
                 throughputs.append(throughput)
