@@ -9,7 +9,7 @@ Canh Son Nguyen Ba (nguyenb1@illinois.edu)
 Overview:
 ---------
 The submitted code implements a TCP like protocol on top of UDP, using python.
-All the required features and functionalities of MP2 has been added and tested. 
+All the required features and functionalities of MP2 have been added and tested. 
 The folder contains results of Experiment (a), (b), (c) as described in the
 handout, Sources codes, Utility scripts, and README file.
 
