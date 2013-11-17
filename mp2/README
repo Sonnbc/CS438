@@ -99,8 +99,8 @@ The following will plot the whole file transfer in pdf [pdfcairo required]:
 ./plot-results.sh pdf
 
 
-Re-performaing the Submitted Experiments:
------------------------------------------
+Re-performing the Submitted Experiments:
+----------------------------------------
 ***NB: By default, the plotting scripts require pdfcairo package which is not 
 installed in ews machines. Please change line 5 in the plotting scripts from 
 format="pdf" to format="eps" as a workaround.***
