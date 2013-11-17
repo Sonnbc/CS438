@@ -6,8 +6,58 @@ Members:
 Md Tanvir Al Amin (maamin2@illinois.edu)
 Canh Son Nguyen Ba (nguyenb1@illinois.edu)
 
+Overview:
+---------
+The submitted code implements a TCP like protocol on top of UDP, using python.
+All the required features and functionalities of MP2 has been added and tested. 
+The folder contains results of Experiment (a), (b), (c) as described in the
+handout, Sources codes, Utility scripts, and README file.
 
-How to run:
+Experiments:
+------------
+(a) Throughput:
+a-throughput.pdf contains the throughput plot.
+Raw data is available in the file 'a-throughput'
+
+As required, throughput experiment was performed for loss patterns 5, 10, 20
+and test files of size 10^3, 10^5, and 10^6 bytes. Each experiment was
+performed 100 times and the mean throughput (along with one sigma error bars)
+has been plotted.
+
+(b) Sequence number vs time:
+As required, the experiment was performed for loss patterns 0, 1, 2, using a
+a test file of size 10^4 bytes. 
+
+b-trace.pdf contains the three plots, one per page. 
+1) Page 1 contains the plot for loss pattern 0. 
+The arrow shows when slow start ends.
+2) Page 2 contains the plot for loss pattern 1. The arrow shows when a fast
+retransmission occurs.
+3) Page 3 contains the plot for loss pattern 2. Each arrow shows when a
+retransmission occured due to timeout.
+
+The sender was running in the machine kopottakha.cs.uiuc.edu, and
+the receiver was running in frc.cs.uiuc.edu on port 1234. 
+Raw data is available in the files b-trace-0, b-trace-1, and b-trace-2 
+
+(c) cwnd vs time:
+As required, the experiment was performed for loss patterns 0, 1, 2, using a 
+test file of size 10^4 bytes.
+
+c-cwnd.pdf contains the three plots, one per page.
+1) Page 1 contains the plot for loss pattern 0. The arrow shows when slow
+start ends (and congestion avoidance begins)
+2) Page 2 contains the plot for loss pattern 1. The left arrow shows when the
+sender transitioned to "Fast Recovery" state (received 3 duplicate ACKs), 
+and the right arrow shows when Fast Recovery ended (received new ACK)
+3) Page 3 contains the plot for loss patter 2. The arrow shows when the slow
+start begins after the first retransmission timeout.
+
+The sender was running in the machine kopottakha.cs.uiuc.edu, and
+the receiver was running in frc.cs.uiuc.edu on port 1234. 
+Raw data is available in the files c-cwnd-0, c-cwnd-1, and c-cwnd-2.
+
+How to Run:
 -----------
 At first run the receiver by executing:
 python receiver.py <receiver-port> <losspattern>
@@ -29,26 +79,31 @@ The sender creates three output files:
 3) log
 
 File 'trace' and 'cwnd' follows the specifications described in the handout.
+Time is specified in milisecond units in these files. Scripts have been
+included that can plot these files as a time series chart.
 
 The log file records various events at the sender, along with the parameters.
 Format of the log file is described later in this document.
 
-Experiments:
-------------
-(a) Throughput:
-a-throughput.pdf contains the throughput plot.
 
-As required, throughput experiment was performed for loss patterns 5, 10, 20
-and test files of size 10^3, 10^5, and 10^6 bytes. Each experiment was
-performed 100 times and the mean throughput (along with one sigma error bars)
-has been plotted.
+Plotting the Outputs:
+---------------------
+To plot the trace and cwnd files, run:
+./plot-results.sh <format> [from-time] [to-time]
+
+For example, the following command  will plot both trace and cwnd from 
+0 to 100 miliseconds as trace.eps and cwnd.eps
+./plot-results.sh eps 0 100
+
+The following will plot the whole file transfer in pdf [pdfcairo required]:
+./plot-results.sh pdf
 
 
-Re-performaing the experiments:
--------------------------------
-***NB: By default, plots require pdfcairo package which is not installed in
-ews machines. Please change line 5 in the plotting scripts from format="pdf" 
-to format="eps" as a workaround.***
+Re-performaing the Submitted Experiments:
+-----------------------------------------
+***NB: By default, the plotting scripts require pdfcairo package which is not 
+installed in ews machines. Please change line 5 in the plotting scripts from 
+format="pdf" to format="eps" as a workaround.***
 
 (a) Throughput: 
 The throughput experiment can be re-performed by the following command:
@@ -58,8 +113,6 @@ The results will be redirected to the file a-throughput.
 The following script will plot this datafile 
 ./plot-a-througput.sh
 This script expects that the datafile is named 'a-throughput'
-
-
 
 (b) Sequence number vs time:
 The following script plots this experiment as b-trace.pdf
@@ -89,7 +142,37 @@ python generate-test-file.py 100000 > test_file.txt
 The file contains integers starting from 1, one per line, until the number of
 byte requirements have been reached.
 
+Log File:
+---------
+In addition to trace and cwnd files, the sender also generates a log file that
+tabulates the important events that happened during the file transfer. It 
+contains one event per line. Each line contains space separated parameters. 
+Examples:
 
+CWND 7.299805 700 SlowStart
+Explanation: At relative time time 7.299805 ms, congestions window was changed
+to 700, and the sender was in SlowStart mode.
+Similar Example: CWND 20.782959 927 FastRecovery
+
+RTTU 7.309082 6.240716 4.271037 23.324862
+Explanation: At 7.309082 ms, estimated RTT was calcuated to be 6.240716ms.
+DevRTT was 4.271037ms, and timeout was 23.324862
+
+ACKN 6.420166 500
+Explanation: At 6.420166, an ACK was received that acknowledged bytes upto 500
+
+SND0 13.880127 1401 CongestionAvoidance
+Explanation: A 100 byte segment starting at byte 1401 was transmitted at time
+13.880127ms, while the sender was operating in CongestionAvoidance mode
+
+TOUT 2253.214024 500.260492
+At 2252.214024ms, a timeout happened, and as a result the timeout interval was
+doubled. After doubling, timeout value became 500.260492ms
+
+SND1 565.395996 501 SlowStart
+The segment with sequence number 501 was retransmitted at time 565.395996ms
+and the sender was in SlowStart duing the retransmission
+Similar Example: SND1 19.799072 1501 FastRecovery
 
 
 Description:
@@ -101,6 +184,9 @@ language: python
 
 Receiver:
 source file: receiver.py
+language: python
+
+Library: common.py
 language: python
 
 The code implements the functionality of TCP on top of UDP.
@@ -125,8 +211,5 @@ An example segment will look like
 
 The segments are all MSS bytes (100 bytes) in size other than the very last.
 
-The submitted code has been thoroughly tested. It prints the received file on 
-the receiver side on the sender side it created two output files named 'trace'
-and 'cwnd' as described in the handout.
 
 
