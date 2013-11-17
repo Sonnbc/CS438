@@ -63,26 +63,27 @@ do
   set yrange [:10000]
   
   #set format y "10^{%g}"
-  #set mxtics 10
+  set mxtics 5
   set mytics 2
 
   set style line 1 lt rgb "#A00000" lw 1 pt 1
   set style line 2 lt rgb "#00A000" lw 1 pt 6
   set style line 3 lt rgb "#5060D0" lw 1 pt 2
-  set style line 4 lt rgb "#F25900" lw 1 pt 9
+  set style line 4 lt rgb "dark-violet" lw 1 pt 9
+  set style arrow 5 head filled size screen 0.02,10,60 ls 4
 
   set key off
 
   set title 'Loss Pattern 0'
   set label 1 "SlowStart ends" at 15.112793, 4100 rotate by 0 front tc rgb "#505050" center
-  set arrow 1 from  10.112793,3900 to 10.112793,1000
+  set arrow 1 from  10.112793,3900 to 10.112793,1000 as 5
   plot "$iter-0" using 1:2 with lp ls 1 ps 0.2 pt 6
     #"< echo '10.112793 900'" with p ls 2 ps 0.4 pt 7
   
 
   set title 'Loss Pattern 1'
   set label 1 "Fast Retransmission" at 19.799072, 4100 rotate by 0 front tc rgb "#505050" center
-  set arrow 1 from  19.799072,3900 to 19.799072,1600
+  set arrow 1 from  19.799072,3900 to 19.799072,1600 as 5
   plot "$iter-1" using 1:2 with lp ls 2 ps 0.2 pt 6
   
 
@@ -91,18 +92,18 @@ do
   set xlabel "Time (ms) - Logarithmic scale"
   set xrange[:50000]
   set mxtics 10
-  set label 1 "Timeout Retransmission" at 500,3000 rotate by 0 front tc rgb "#505050" center 
-  set arrow 1 from 19.957031,2000 to 19.957031,101
-  set arrow 2 from 54.685059,2000 to 54.685059,101
-  set arrow 3 from 123.206055,2000 to 123.206055,101
-  set arrow 4 from 259.461182,2000 to 259.461182,101
-  set arrow 5 from 531.251953,2000 to 531.251953,101
-  set arrow 6 from 1074.026123,2000 to 1074.931152,101
-  set arrow 7 from 2159.006104,2000 to 2159.006104,101
-  set arrow 8 from 4328.041992,2000 to 4328.041992,101
-  set arrow 9 from 8665.395996,2000 to 8665.395996,101
-  set arrow 10 from 10000.356934,2000 to 17339.356934,101
-  set arrow 11 from 40000.127930,2000 to 17361.127930,201 
+  set label 1 "Timeout caused retransmissions" at 500,2500 rotate by 0 front tc rgb "#505050" center 
+  set arrow 1 from 19.957031,2000 to 19.957031,101 as 5
+  set arrow 2 from 54.685059,2000 to 54.685059,101 as 5
+  set arrow 3 from 123.206055,2000 to 123.206055,101 as 5
+  set arrow 4 from 259.461182,2000 to 259.461182,101 as 5
+  set arrow 5 from 531.251953,2000 to 531.251953,101 as 5
+  set arrow 6 from 1074.026123,2000 to 1074.931152,101 as 5
+  set arrow 7 from 2159.006104,2000 to 2159.006104,101 as 5
+  set arrow 8 from 4328.041992,2000 to 4328.041992,101 as 5
+  set arrow 9 from 8665.395996,2000 to 8665.395996,101 as 5
+  set arrow 10 from 10000.356934,2000 to 17339.356934,101 as 5
+  set arrow 11 from 40000.127930,2000 to 17361.127930,201 as 5
 
   plot "$iter-2" using 1:2 with lp ls 3 ps 0.2
 EOF
