@@ -45,11 +45,12 @@ class TCPSender:
 #------------------------------------------------------------------------------            
     def set_cwnd(self, value):
         self.cwnd = value
+        timestamp = current_time()
         print >> self.cwnd_file, "%f %d" %\
-                (current_time() - self.time_origin, 
+                (timestamp - self.time_origin, 
                 self.cwnd)
         print >> self.log_file, "CWND %f %d %s" %\
-                (current_time() - self.time_origin, 
+                (timestamp - self.time_origin, 
                 self.cwnd, 
                 self.congestion_phase) 
 #------------------------------------------------------------------------------
@@ -62,9 +63,9 @@ class TCPSender:
         self.estimatedRTT = 0.875*self.estimatedRTT + 0.125*sampleRTT
         self.devRTT = 0.75*self.devRTT + 0.25*abs(sampleRTT - self.estimatedRTT)
         self.timeout = self.estimatedRTT + 4*self.devRTT
-        #print "timeout: ", self.timeout
+        timestamp = current_time()
         print >> self.log_file, "RTTU %f %f %f %f" %\
-                (current_time() - self.time_origin,
+                (timestamp - self.time_origin,
                 self.estimatedRTT,
                 self.devRTT,
                 self.timeout)
@@ -72,11 +73,12 @@ class TCPSender:
     def handle_ack(self, segment):
         
         ack = get_ack(segment)
+        timestamp = current_time()
         print >> self.trace_file, "%f %d" %\
-                (current_time() - self.time_origin,
+                (timestamp - self.time_origin,
                 ack - 1)
         print >> self.log_file, "ACKN %f %d" %\
-                (current_time() - self.time_origin,
+                (timestamp - self.time_origin,
                 ack - 1)
         if ack < self.send_base:
             return
@@ -129,8 +131,9 @@ class TCPSender:
         self.congestion_phase = SLOW_START
         self.ssthresh = self.cwnd / 2
         self.duplicate_acks = 0
+        timestamp = current_time()
         print >> self.log_file, "TOUT %f %f" %\
-                (current_time() - self.time_origin,
+                (timestamp - self.time_origin,
                 self.timeout)
         self.set_cwnd(MSS)
         
@@ -144,9 +147,9 @@ class TCPSender:
         segment = build_segment(self.next_seq_num, 0, 
             RWND_INIT, msg_type, self.data[idx])
         self.segments[idx] = segment
-        
+        timestamp = current_time()
         print >> self.log_file, "SND0 %f %d %s" %\
-                (current_time() - self.time_origin,
+                (timestamp - self.time_origin,
                 self.next_seq_num,
                 self.congestion_phase)
         self.udp_send(segment)
@@ -161,8 +164,9 @@ class TCPSender:
         
 #------------------------------------------------------------------------------
     def retransmit(self, idx):
+        timestamp = current_time()
         print >> self.log_file, "SND1 %f %d %s" %\
-                (current_time() - self.time_origin,
+                (timestamp - self.time_origin,
                 self.send_base,
                 self.congestion_phase)
         self.udp_send(self.segments[idx])

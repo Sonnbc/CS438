@@ -83,7 +83,11 @@ do
   
   
   set title "Loss Pattern 1"
-  plot "$iter-1" using 1:(\$2+1) with lp ls 2 ps 0.2 #title 'Loss Pattern 1'
+  set label 1 "FastRecovery begins" at 19.780029, 1400 rotate by 0 front tc rgb "#505050" center
+  set arrow 1 from  10.112793,1300 to 19.780029,827
+  set label 2 "FastRecovery ends" at 21.757080, 1400 rotate by 0 front tc rgb "#505050" center
+  set arrow 2 from  10.112793,1300 to 21.757080,927
+  plot "$iter-1" using 1:2 with lp ls 2 ps 0.2 #title 'Loss Pattern 1'
   
    
   set title "Loss Pattern 2"
@@ -91,7 +95,7 @@ do
   set xlabel "Time (ms) - Logarithmic scale"
   set xrange[0.001:50000]
   #set mxtics 10
-  plot "$iter-2" using 1:(\$2+1) with lp ls 3 ps 0.2 #title 'Loss Pattern 2'
+  plot "$iter-2" using 1:2 with lp ls 3 ps 0.2 #title 'Loss Pattern 2'
 EOF
 done
 
