@@ -57,16 +57,16 @@ do
   set ylabel "$ylabel"
   set title "$title"
   
-  #set xtics 5 
-  #set ytics 100
-  #set xrange [0:50]    #set x and y range
-  set yrange [0:]
+  set xtics 10
+  #set ytics 1000
+  set xrange [:110]    #set x and y range
+  set yrange [:1800]
   
   #set log x
   #set log y
   #set format y "10^{%g}"
   #set mxtics 10
-  set mytics 2
+  #set mytics 2
 
   set style line 1 lt rgb "#A00000" lw 1 pt 1
   set style line 2 lt rgb "#00A000" lw 1 pt 6
@@ -74,17 +74,24 @@ do
   set style line 4 lt rgb "#F25900" lw 1 pt 9
 
   set key off
-  #set key top left
 
-  #plot "$iter.hist" using 1:2 with boxes lc rgb '#202090'
   set title "Loss Pattern 0"
-  plot "$iter-0" using 1:(\$2+1) with lp ls 1 ps 0.2
+  set label 1 "SlowStart ends" at 15.112793, 1400 rotate by 0 front tc rgb "#505050" center
+  set arrow 1 from  10.112793,1300 to 10.112793,1020
+  plot "$iter-0" using 1:2 with lp ls 1 ps 0.2 pt 6
+    #"< echo '10.112793 900'" with p ls 2 ps 0.4 pt 7
+  
+  
   set title "Loss Pattern 1"
   plot "$iter-1" using 1:(\$2+1) with lp ls 2 ps 0.2 #title 'Loss Pattern 1'
+  
+   
   set title "Loss Pattern 2"
+  set log x
+  set xlabel "Time (ms) - Logarithmic scale"
+  set xrange[0.001:50000]
+  #set mxtics 10
   plot "$iter-2" using 1:(\$2+1) with lp ls 3 ps 0.2 #title 'Loss Pattern 2'
-  #plot "$iter" using 1:3 with lp pointsize 0.5 pt 7
-  #plot bar chart and the value labels on the bars
 EOF
 done
 
