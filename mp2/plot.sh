@@ -59,15 +59,15 @@ do
   #set mxtics 10
   #set mytics 2
 
-  set style line 1 lt rgb "#A00000" lw 1 pt 1
-  set style line 2 lt rgb "#00A000" lw 1 pt 6
-  set style line 3 lt rgb "#5060D0" lw 1  pt 2
-  set style line 4 lt rgb "#F25900" lw 1 pt 9
+  set style line 1 lt rgb "#A00000" lw 1 pt 1 ps $pointsize
+  set style line 2 lt rgb "#00A000" lw 1 pt 6 ps $pointsize
+  set style line 3 lt rgb "#5060D0" lw 1  pt 2 ps $pointsize
+  set style line 4 lt rgb "#F25900" lw 1 pt 9 ps $pointsize
 
   set key off
   #set key top left
 
-  plot "$iter" using (\$1):(\$2) with lp ls $style ps $pointsize 
+  plot "$iter" using 1:2 with lp ls $style
 EOF
 done
 

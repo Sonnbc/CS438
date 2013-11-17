@@ -213,9 +213,11 @@ def main(filename, receiver_domain, receiver_port):
     with open(filename) as my_file:
         data = list(iter(lambda: my_file.read(MSS), ''))
         
-    with open('cwnd', 'w') as cwnd_file, open('trace', 'w') as trace_file, open('log', 'w') as log_file:    
-        sender = TCPSender(receiver_domain, receiver_port, cwnd_file, trace_file, log_file)
-        sender.run(data)
+    with open('cwnd', 'w') as cwnd_file:
+        with open('trace', 'w') as trace_file:
+            with open('log', 'w') as log_file:
+                sender = TCPSender(receiver_domain, receiver_port, cwnd_file, trace_file, log_file)
+                sender.run(data)
 #------------------------------------------------------------------------------
 if __name__ == "__main__":
     main(sys.argv[1], sys.argv[2], int(sys.argv[3]))
