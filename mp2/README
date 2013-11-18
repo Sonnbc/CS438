@@ -98,6 +98,11 @@ For example, the following command  will plot both trace and cwnd from
 The following will plot the whole file transfer in pdf [pdfcairo required]:
 ./plot-results.sh pdf
 
+You can also specify other terminals that gnuplot understands.
+For example running "/.plot-results.sh dumb" will result in two files named
+trace.dumb and cwnd.dumb that will contain the plots as ascii arts. 
+Similarly latex, gif, etc can also be used.
+
 
 Re-performing the Submitted Experiments:
 ----------------------------------------

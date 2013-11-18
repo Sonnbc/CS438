@@ -68,9 +68,9 @@ do
   set mxtics 5
   set mytics 2
 
-  set style line 1 lt rgb "#A00000" lw 1 pt 1
-  set style line 2 lt rgb "#00A000" lw 1 pt 6
-  set style line 3 lt rgb "#5060D0" lw 1 pt 2
+  set style line 1 lt rgb "#A00000" lw 1 pt 6 ps 0.2
+  set style line 2 lt rgb "#00A000" lw 1 pt 6 ps 0.2
+  set style line 3 lt rgb "#5060D0" lw 1 pt 2 ps 0.2
   set style line 4 lt rgb "dark-violet" lw 1 pt 9
   set style arrow 5 head filled size screen 0.02,10,60 ls 4
   set key off
@@ -78,16 +78,14 @@ do
   set title "Loss Pattern 0"
   set label 1 "SlowStart ends" at 15.112793, 1330 rotate by 0 front tc rgb "#505050" center
   set arrow 1 from  10.112793,1300 to 10.112793,1020 as 5
-  plot "$iter-0" using 1:2 with lp ls 1 ps 0.2 pt 6
-    #"< echo '10.112793 900'" with p ls 2 ps 0.4 pt 7
-  
+  plot "$iter-0" using 1:2 with lp ls 1
   
   set title "Loss Pattern 1"
   set label 1 "FastRecovery begins" at 19.762939, 1200 rotate by 0 front tc rgb "#505050" center
   set arrow 1 from  19.762939,1150 to 19.762939,900 as 5
   set label 2 "FastRecovery ends" at 21.739990, 250 rotate by 0 front tc rgb "#505050" center
   set arrow 2 from  21.739990,300 to 21.739990,500 as 5
-  plot "$iter-1" using 1:2 with lp ls 2 ps 0.2 #title 'Loss Pattern 1'
+  plot "$iter-1" using 1:2 with lp ls 2
   
    
   set title "Loss Pattern 2"
@@ -100,7 +98,7 @@ do
   set label 2 ''
   set arrow 2 from 1,-1 to 1,-1
   #set mxtics 10
-  plot "$iter-2" using 1:2 with lp ls 3 ps 0.2 #title 'Loss Pattern 2'
+  plot "$iter-2" using 1:2 with lp ls 3
 EOF
 done
 

@@ -66,9 +66,9 @@ do
   set mxtics 5
   set mytics 2
 
-  set style line 1 lt rgb "#A00000" lw 1 pt 1
-  set style line 2 lt rgb "#00A000" lw 1 pt 6
-  set style line 3 lt rgb "#5060D0" lw 1 pt 2
+  set style line 1 lt rgb "#A00000" lw 1 ps 0.2 pt 6
+  set style line 2 lt rgb "#00A000" lw 1 ps 0.2 pt 6 
+  set style line 3 lt rgb "#5060D0" lw 1 ps 0.2 pt 2
   set style line 4 lt rgb "dark-violet" lw 1 pt 9
   set style arrow 5 head filled size screen 0.02,10,60 ls 4
 
@@ -77,14 +77,13 @@ do
   set title 'Loss Pattern 0'
   set label 1 "SlowStart ends" at 15.112793, 4100 rotate by 0 front tc rgb "#505050" center
   set arrow 1 from  10.112793,3900 to 10.112793,1000 as 5
-  plot "$iter-0" using 1:2 with lp ls 1 ps 0.2 pt 6
-    #"< echo '10.112793 900'" with p ls 2 ps 0.4 pt 7
+  plot "$iter-0" using 1:2 with lp ls 1
   
 
   set title 'Loss Pattern 1'
   set label 1 "Fast Retransmission" at 19.799072, 4100 rotate by 0 front tc rgb "#505050" center
   set arrow 1 from  19.799072,3900 to 19.799072,1600 as 5
-  plot "$iter-1" using 1:2 with lp ls 2 ps 0.2 pt 6
+  plot "$iter-1" using 1:2 with lp ls 2
   
 
   set title 'Loss Pattern 2'
@@ -105,7 +104,7 @@ do
   set arrow 10 from 10000.356934,2000 to 17339.356934,101 as 5
   set arrow 11 from 40000.127930,2000 to 17361.127930,201 as 5
 
-  plot "$iter-2" using 1:2 with lp ls 3 ps 0.2
+  plot "$iter-2" using 1:2 with lp ls 3
 EOF
 done
 
