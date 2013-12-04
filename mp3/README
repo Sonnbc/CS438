@@ -6,4 +6,14 @@ Canh Son Nguyen Ba (nguyenb1@illinois.edu)
 cs438 MP3:
 ---------
 
+Part I:
+-------
 
+
+Part II:
+--------
+How to run:
+python checksum.py
+
+It will expect 8 16-bit integers from stdin and 
+write the 16-bit checksum to stdout.
