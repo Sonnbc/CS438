@@ -1,17 +1,36 @@
 
 import sys
 
-def checksum(n, w, fin):
-    ssum = 0
+def checksum(words, w):
+    ssum = words[0]
     mask = 2 ** w - 1
-    for i in xrange(0, n):
-        word = int(fin.readline()[:-1])
+    for word in words[1:]:
         ssum += word
+        #print ssum
         if ssum > mask:
-            ssum = ssum & mask + 1
+            ssum = (ssum & mask) + 1
+            # print ">>", ssum
     csum = ssum ^ mask
     return csum
 
+def read_words(n, base, fin):
+    done = 0
+    words = []
+    while done < n:
+        text = fin.readline()[:-1]
+        tokens = text.split(' ')
+        for token in tokens:
+            try:
+                words.append(int(token, base))
+                done += 1
+            except: # can not parse
+                continue
+    return words
+
 if __name__ == '__main__':
-    print checksum(8, 16, sys.stdin)
+    nwords = 8
+    wordsize = 16
+    base = 10
+    words = read_words(nwords, base, sys.stdin)
+    print checksum(words, wordsize)
 
