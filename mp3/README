@@ -8,7 +8,13 @@ cs438 MP3:
 
 Part I:
 -------
-
+How to run:
+1. For computing crc:
+    python encoder.py g k d
+2. For comparing crc computation time and look up time:
+    python encoder.py
+2. For measuring probability of detection:
+    python encoder.py g
 
 Part II:
 --------
